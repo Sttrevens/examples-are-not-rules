@@ -28,12 +28,13 @@ Finding the subject:
 - A class name can be too narrow as well. "Creature" means "has a body and a mind", but following only needs position and visibility. Whatever the name demands beyond what the rule reads is the range of things you'll wrongly exclude.
 - When you turn an open-ended phrase from the user ("if something gets in the way") into a list, write the list items as capabilities ("out of reach", "can't see it", "no path"), not as states of one kind of thing ("target died" also excludes a corpse being dragged away).
 - Check: swap the first example for the second in the rule's sentence. If it still reads true, the subject is right.
-- If you're not sure the user wants the whole class, ask once, and include your proposed subject and second example. Don't silently narrow it to the example, and don't silently widen it to "everything".
+- If you're not sure the user wants the whole class, ask once: give your proposed subject and 2-3 candidate second examples to pick from (does "follow" include a dog? a car?), not an open question. Don't silently narrow it to the example, and don't silently widen it to "everything".
 
 A capability is a fact the rule reads directly (can hear, has a position, has export permission). A kind is a name (person, admin, Safari, `run`). Checking the kind assumes the name will always come bundled with those capabilities. Web developers learned this the hard way: browser sniffing by User-Agent breaks; feature detection doesn't.
 
 ## 2. The second example
 
+- Who picks it: whoever writes the spec, never whoever implements it. An implementer that picks its own second example picks one it already passes. Whoever writes the test must not be whoever takes it. Propose it yourself and write it next to the subject; only bring the user in when the subject is a real design decision (section 1), not on every rule.
 - How to pick it: it has every capability the rule reads, but differs from the first example in kind, data shape, or where its data lives. The more shortcuts it breaks, the better. If the target is "a person", pick "an item carried by a person": it has no position of its own, its position comes from whoever is holding it, and a person-only implementation fails immediately.
 - Acceptance: every rule has at least one test that exercises the behavior with the second example. An implementation that only passes with the first example is not done. Tests that regex-match the source code don't count.
 - Same code path: the second example must go through the same code as the first. Adding a separate branch for it just hardcodes two examples instead of one.
@@ -103,18 +104,18 @@ Check the tests too: if a rule's tests only use the first example, the missing s
 The receiving agent only sees the contract, and each handoff loses a little more of the "why" from the layer above. Every rule in the contract needs the items below, even if the contract links to a design doc, because the receiver will build from the contract:
 
 - The subject and what decides it;
-- The first example, the second example, and the test for the second example;
+- The first example, the second example, and the test for the second example. The second example is fixed: the receiver may not swap it or pick its own;
 - A failure condition: "An implementation that only works for <first example> is rejected";
 - Names that follow the subject, not the example (`perceivedEntity`, not `perceivedPerson`);
 - A requirement that the report back lists every kind-based branch in the new code and why each one is fine.
 
 The items most often missed are the failure condition and the test list. The subject gets written correctly, but the failure condition says "when following a person, walks to the old tile" and the browser test says "follow a walking person", and the receiver still builds a person-only feature.
 
-If you're the receiver and a rule in the contract has an example but no subject: point it out before writing code, or fill it in using this section and state in your report which subject you added.
+If you're the receiver and a rule in the contract has an example but no subject: point it out before writing code, or fill it in using this section and state in your report which subject you added. If it has no second example, send it back and ask for one before writing code. Don't invent one: you'd pick one you already pass. (Contract says "only admins can delete" with no second example? Ask whether an editor should; don't decide that `role === 'admin'` is the rule.)
 
 ## Self-check
 
-- Does every rule have a subject, what decides it, and a second example?
+- Does every rule have a subject, what decides it, and a second example chosen by the spec writer, not the implementer?
 - Does the second example have a test, and does it run through the same code as the first?
 - Is there any new abstraction that wasn't needed to make the second example pass? If so, delete it.
 - Has every kind branch in the new code been asked "what it is, or what it can do?"
